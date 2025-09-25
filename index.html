@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>Easy Earn - Premium Mini App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Auru Ads SDK -->
+  <script src="https://auruads.com/cdn/ads.js?app_uid=5059"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(-45deg, #ff4e50, #fc913a, #1cb5e0, #2ecc71);
+      background-size: 400% 400%;
+      animation: gradientBG 12s ease infinite;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    header, footer {
+      padding: 18px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      margin: 12px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+
+    header {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .counter {
+      font-size: 18px;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 25px;
+      padding: 20px;
+    }
+
+    .glass-btn {
+      position: relative;
+      width: 80%;
+      max-width: 330px;
+      padding: 18px;
+      border: none;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .glass-btn:hover {
+      transform: translateY(-4px) scale(1.02);
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .badge {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: #4caf50;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+      display: none;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.7); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .floating-btns {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .floating-btns button {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      padding: 0;
+      font-size: 26px;
+      border: none;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease;
+    }
+
+    .floating-btns button:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    #rewardMsg {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 10px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    🏆 Easy Earn  
+    <div class="counter">⏱ দেখা হয়েছে: <span id="adCount">0</span> বিজ্ঞাপন</div>
+  </header>
+
+  <main>
+    <button class="glass-btn" id="showAdBtn1">
+      📺 বিজ্ঞাপন দেখুন
+      <span class="badge" id="badge1">✅ Loaded</span>
+    </button>
+    <button class="glass-btn" id="showAdBtn2">
+      📺 বিজ্ঞাপন দেখুন
+      <span class="badge" id="badge2">✅ Loaded</span>
+    </button>
+    <div id="rewardMsg"></div>
+  </main>
+
+  <div class="floating-btns">
+    <button id="resetBtn">🔄</button>
+    <button id="reloadBtn">♻️</button>
+  </div>
+
+  <footer>👣 © 2025 Easy Earn | Premium Glass UI</footer>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    let adCount = 0;
+    const adCountEl = document.getElementById("adCount");
+    const rewardMsg = document.getElementById("rewardMsg");
+    const buttons = [
+      {btn: document.getElementById("showAdBtn1"), badge: document.getElementById("badge1")},
+      {btn: document.getElementById("showAdBtn2"), badge: document.getElementById("badge2")}
+    ];
+
+    function showAd() {
+      window.showAuruads()
+        .then(() => {
+          adCount++;
+          adCountEl.innerText = adCount;
+          rewardMsg.innerText = "🎁 আপনি সফলভাবে বিজ্ঞাপন দেখলেন!";
+          tg.sendData(JSON.stringify({adsWatched: adCount}));
+        })
+        .catch(e => {
+          rewardMsg.innerText = "⚠️ বিজ্ঞাপন লোড হয়নি: " + e.message;
+        });
+    }
+
+    // স্ক্রিপ্ট লোড হলে ব্যাজ দেখাও
+    window.addEventListener("load", () => {
+      buttons.forEach(item => {
+        item.badge.style.display = "inline-block";
+      });
+    });
+
+    buttons.forEach(item => {
+      item.btn.addEventListener("click", showAd);
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      adCount = 0;
+      adCountEl.innerText = adCount;
+      rewardMsg.innerText = "🔄 রিসেট করা হয়েছে";
+    });
+
+    document.getElementById("reloadBtn").addEventListener("click", () => {
+      location.reload();
+    });
+  </script>
+</body>
+</html>
